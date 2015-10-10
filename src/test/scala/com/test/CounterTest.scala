@@ -1,11 +1,10 @@
 package com.test
 
 import akka.actor.ActorSystem
-import akka.cluster.Cluster
-import akka.cluster.sharding.{ClusterShardingSettings, ClusterSharding}
 import akka.testkit.{ImplicitSender, TestKit}
-import com.test.Counter.{Get, Inc}
+import com.test.Counter._
 import org.scalatest.{Matchers, WordSpecLike}
+
 import scala.concurrent.duration._
 
 /**
@@ -14,22 +13,22 @@ import scala.concurrent.duration._
 class CounterTest extends TestKit(ActorSystem("CounterTest"))
   with WordSpecLike with Matchers with ImplicitSender{
   "Counter" must {
-    "must increment correctly" in {
-      val cluster = Cluster(system)
-      cluster join cluster.selfAddress
 
-      val counter = ClusterSharding(system).start(
-        "Counter",
-        Counter.props,
-        ClusterShardingSettings(system),
-        Counter.extractEntityId,
-        Counter.extractShardId
-      )
+    val id = "123"
 
-      (1 to 100).foreach( _ => counter ! Inc)
+    var counter = system.actorOf(Counter.props, id)
+    "increment up to 1000" in {
+      (1 to 1000).foreach(_ => counter ! Inc)
       counter ! Get
-      expectMsg(10 seconds, 100)
-
+      expectMsg(2 minutes, 1000)
+    }
+    "crash and recovery the counter" in {
+      watch(counter)
+      counter ! Shutdown
+      expectTerminated(counter)
+      counter = system.actorOf(Counter.props, id)
+      counter ! Get
+      expectMsg(2 minutes, 1000)
     }
   }
 }

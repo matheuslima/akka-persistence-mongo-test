@@ -11,6 +11,7 @@ object Counter {
   def props = Props[Counter]
   case object Inc
   case object Get
+  case object Shutdown
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
     case x => ("1", x)
@@ -33,6 +34,7 @@ class Counter extends PersistentActor{
         counter += 1
       }
     case Get => sender() ! counter
+    case Shutdown => context stop self
   }
 
   override def persistenceId: String = self.path.name

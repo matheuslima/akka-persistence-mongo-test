@@ -13,6 +13,5 @@ libraryDependencies ++= Seq(
   "org.reactivemongo" %% "reactivemongo" % "0.11.6",
   "org.mongodb" %% "casbah" % "2.8.1",
   "com.github.scullxbones" %% "akka-persistence-mongo-rxmongo" % "1.0.7",
-  "com.github.scullxbones" %% "akka-persistence-mongo-casbah" % "1.0.7",
   "org.scalatest" %% "scalatest" % "2.2.1" % "test"
 )
